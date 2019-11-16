@@ -10,6 +10,7 @@ services:
     restart: unless-stopped
     tty: true
     environment:
+      XDEBUG_CONFIG: remote_host=host.docker.internal remote_port=9000 remote_enable=1
       SERVICE_NAME: app
       SERVICE_TAGS: dev
     working_dir: /var/www
