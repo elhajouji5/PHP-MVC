@@ -16,5 +16,12 @@ class ProductController extends Controller
     {
         $products = Product::get();
         return $products;
-    }   
+    }
+
+    public function show($params)
+    {
+        $uid = $params[0];
+        $products = Product::with_variants(['slug', $uid]);
+        return count($products) ? $products[0] : [];
+    }
 }

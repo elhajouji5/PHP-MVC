@@ -25,14 +25,15 @@ class Product extends Model
      * @return array
      * Fetch products with their variants from database
      */
-    public static function with_variants()
+    public static function with_variants($param)
     {
-        $products = DB::select('SELECT p.*, v.display_name AS variant_display_name,
+        $products = DB::select("SELECT p.*, v.display_name AS variant_display_name,
             v.slug AS variant_slug, v.uid AS variant_uid, v.price AS variant_price,
             v.qty AS variant_qty
             FROM products AS p
-            JOIN variants AS v ON p.uid = v.product_uid'
-        );
+            JOIN variants AS v ON p.uid = v.product_uid
+            WHERE p.{$param[0]} = :search
+        ", $param);
         $self = (new static);
         $data = $self->prepare_response($products);
         return $self->remove_guarded_data($data);
