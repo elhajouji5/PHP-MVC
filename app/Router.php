@@ -35,7 +35,7 @@ class Router
         $method = explode('@', array_values($requested_resource)[0])[1];
         require_once __DIR__ . "/Controllers/{$controller_name}.php"; // Load the corresponding controller
         $controller = new $controller_name; // Instantaite the corresponding controller
-        $response = $controller->{$method}(array_values($this->params)); // Call the corresponding method
+        $response = $controller->{$method}(array_values($this->params ?? [])); // Call the corresponding method
         /**
          * Make sure that the request was valid and executed successfully
          * before setting the response data
@@ -127,19 +127,21 @@ class Router
         $dynamic_route = array_filter($dynamic_route, function($val){
             return !!$val;
         });
+        $dynamic_route = array_values($dynamic_route ?? []);
+        $requested_route = array_values($requested_route ?? []);
         if(count($dynamic_route) != count($requested_route)) return;
-
-        $searches = array_diff($dynamic_route, $requested_route);
-        $replacemets = array_diff($requested_route, $dynamic_route);
+        for($i = 0; $i < count($dynamic_route); $i++)
+        {
+            if($dynamic_route[$i] == $requested_route[$i]) continue;
+            if(preg_match("/^\{.*\}$/", $dynamic_route[$i]))
+            {
+                $dynamic_route[$i] = $requested_route[$i];
+                $this->params[] = $requested_route[$i];
+            }
+        }
         $requested_route = implode('/', $requested_route);
         $dynamic_route = implode('/', $dynamic_route);
-        $uri = str_replace($searches, $replacemets, $requested_route);
-        if($requested_route == $uri)
-        {
-            $this->params = $replacemets;
-            return true;
-        }
-        return false;
+        return ($requested_route == $dynamic_route);
     }
 
     /**
