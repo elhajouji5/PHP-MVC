@@ -16,7 +16,8 @@ class Product extends Model
         if(!$connection) return;
         $self = (new static);
         $schema_name = $self->get_schema_name();
-        $data = DB::select("SELECT * FROM {$schema_name}");
+        // JOIN images AS img ON products.uid = img.imageable_id
+        $data = DB::select("SELECT products.*, (select image_link from images where images.imageable_id = products.uid limit 1) AS 'image' FROM {$schema_name} ");
         return $self->remove_guarded_data($data);
     }
 
@@ -36,6 +37,11 @@ class Product extends Model
         ", $param);
         $self = (new static);
         $data = $self->prepare_response($products);
+        if(is_array($data) && count($data))
+        {
+            $images = DB::select("SELECT image_link, sort_index FROM images where imageable_id = '" . $data[0]['uid'] . "' AND imageable_type = 'product'");
+            $data[0]['images'] = $images;
+        }
         return $self->remove_guarded_data($data);
     }
 

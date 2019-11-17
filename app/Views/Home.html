@@ -2,7 +2,61 @@
 <html>
     <body>
         <h1>
-            Welcome to our car store, enjoy browsing the best deals :)
+            Welcome to our store, enjoy our the best deals :)
+
+            <div class="container">
+                <div class='content'></div>
+            </div>
         </h1>
     </body>
+
+    <script>
+        function get_products() {
+            fetch('/api/products')
+                .then(response => response.json())
+                .then(json => load_products(json))
+        }
+        function load_products(products) {
+            products.map(function(product){
+                let product_div = `
+                    <div class='row'>
+                        <a href='/products/${product.slug}'>
+                            <img src='${product.image}'>
+                        </a>
+                        <a href='/products/${product.slug}'>
+                            <p class='title'>${product.display_name}</p>
+                        </a>
+                    </div>
+                `;
+                document.querySelector('.content').innerHTML += product_div;
+            })
+        }
+
+        get_products()
+    </script>
+
+    <style>
+        .container {
+            margin: 20px 10px;
+        }
+        h1 {
+            color: #546e7a;
+        }
+        .row {
+            display: block;
+            border: 1px solid #e0f7fa;
+            padding: 10px;
+            width: 200px;
+            text-align: center;
+        }
+        .title {
+            color: #27d;
+            text-decoration: none;
+            font-size: 16px;
+        }
+        img {
+            height: 150px;
+            width: auto;
+        }
+    </style>
 </html>
