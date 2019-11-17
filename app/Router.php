@@ -8,12 +8,18 @@ class Router
      */
     private static $all_routes;
 
+    /**
+     * @var array $params
+     * this variable holds the requests params
+     */
+    private $params;
+
     public function __construct()
     {
         static::$all_routes = static::$all_routes ?? [];
         require_once __DIR__.'/Api.php';
+        $this->params = [];
     }
-
 
 
     /**
@@ -25,11 +31,11 @@ class Router
         {
             return;
         }
-        $controller_name = explode('@', $requested_resource)[0];
-        $method = explode('@', $requested_resource)[1];
-        require_once __DIR__ . "/Controllers/{$controller_name}.php";
-        $controller = new $controller_name; // Initialize the corresponding controller
-        $response = $controller->{$method}(); // Call the corresponding method
+        $controller_name = explode('@', array_values($requested_resource)[0])[0];
+        $method = explode('@', array_values($requested_resource)[0])[1];
+        require_once __DIR__ . "/Controllers/{$controller_name}.php"; // Load the corresponding controller
+        $controller = new $controller_name; // Instantaite the corresponding controller
+        $response = $controller->{$method}(array_values($this->params)); // Call the corresponding method
         /**
          * Make sure that the request was valid and executed successfully
          * before setting the response data
@@ -51,12 +57,20 @@ class Router
     private function validate_route_existence()
     {
         $routes = array_key_exists($this->get_method(), $this->get_routes()) ? $this->get_routes()[$this->get_method()] : [];
-        $requested_resource = array_filter($routes, function($item){
-            // Check if the requested path exists in the routes keys
-            return array_key_exists($this->get_path(), $item);
+        $requested_resource = array_filter($routes, function($registered_route){
+            // Ith the requested endpoint exists in the registered routes, return it
+            if(array_key_exists($this->get_path(), $registered_route))
+            {
+                return true;
+            }
+            // Else check if any of the registered dynamic route matches the requested endpoint
+            return $this->check_dynamic_routes(array_keys($registered_route)[0]);
         });
         if(!$requested_resource)
         {
+            // Set the response type to applicatio/json
+            header('Content-Type: application/json');
+            header('Accept: application/json');
             App::set_response([
                 'status_code' => 404,
                 'message' => 'The requested endpoint does not exist',
@@ -65,7 +79,7 @@ class Router
             ]);
             return;
         }
-        return array_values($requested_resource)[0][$this->get_path()];
+        return array_values($requested_resource)[0];
     }
 
 
@@ -93,6 +107,34 @@ class Router
     public function get_routes() : array
     {
         return static::$all_routes;
+    }
+
+
+    /**
+     * @return boolean
+     * Search for a dynamic route matching the requested one
+     * example: if the requested route is "products/PR-363545363",
+     * we return the route "products/{id}" if exists
+     */
+    public function check_dynamic_routes($registered_dynamic_route)
+    {
+        $requested_route = preg_replace("/\/$/", '', $this->get_path()); // Remove slash from the end of the requested route
+        $dynamic_route = preg_replace("/\/$/", '', $registered_dynamic_route); // Remove slash from the end of the dynamic route
+        $requested_route = explode('/', $requested_route);
+        $dynamic_route = explode('/', $dynamic_route);
+        if(count($dynamic_route) != count($requested_route)) return;
+
+        $searches = array_diff($dynamic_route, $requested_route);
+        $replacemets = array_diff($requested_route, $dynamic_route);
+        $requested_route = implode('/', $requested_route);
+        $dynamic_route = implode('/', $dynamic_route);
+        $uri = str_replace($searches, $replacemets, $requested_route);
+        if($requested_route == $uri)
+        {
+            $this->params = $replacemets;
+            return true;
+        }
+        return false;
     }
 
     /**
