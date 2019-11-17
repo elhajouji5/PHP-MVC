@@ -9,16 +9,16 @@ class CartController extends Controller
 
     public function get_cart()
     {
-        return [
+        $response = [
             'cart_items' => [
                 [
-                    'method' => 'post',
                     'row_id' => uniqid(),
                     'name' => str_shuffle('abcdefghijklmnopqrstuvwxyz'),
                     'price' => 1000,
                 ]
             ]
         ];
+        return $response;
     }
    
 

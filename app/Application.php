@@ -11,10 +11,12 @@ class App
     private static $instance;
 
     public $response;
+    public $config;
 
     private function __construct()
     {
         $this->response = [];
+        $this->load_classes();
     }
 
     /**
@@ -69,5 +71,16 @@ class App
     private function distruct()
     {
         $this->response = [];
+    }
+
+    /**
+     * Load important classes
+     */
+    private function load_classes()
+    {
+        require_once __DIR__ . "/Models/Model.php";
+        require_once __DIR__ . "/Models/Connection.php";
+        require_once __DIR__ . "/Controllers/Controller.php";
+        $this->config = include(__DIR__ . "/../config/config.php");
     }
 }

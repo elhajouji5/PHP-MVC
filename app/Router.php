@@ -27,10 +27,19 @@ class Router
         }
         $controller_name = explode('@', $requested_resource)[0];
         $method = explode('@', $requested_resource)[1];
-        require_once __DIR__ . "/Controllers/Controller.php";
         require_once __DIR__ . "/Controllers/{$controller_name}.php";
-        $controller = new $controller_name;
-        $response = $controller->{$method}();
+        $controller = new $controller_name; // Initialize the corresponding controller
+        $response = $controller->{$method}(); // Call the corresponding method
+        /**
+         * Make sure that the request was valid and executed successfully
+         * before setting the response data
+         */
+        $app = App::get_instance();
+        if(array_key_exists('status_code', $app->response) && (int)$app->response['status_code'] >= 400)
+        {
+            return;
+        }
+        // Set the final response data
         App::set_response($response);
     }
 
@@ -56,7 +65,7 @@ class Router
             ]);
             return;
         }
-        return $requested_resource[0][$this->get_path()];
+        return array_values($requested_resource)[0][$this->get_path()];
     }
 
 
