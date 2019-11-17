@@ -97,8 +97,7 @@ class Router
      */
     public function get_path() : string
     {
-        // remove the slash(/) from the beggining if exists
-        return preg_replace("/(^\/)/", "", $_SERVER['REQUEST_URI']);
+        return $_SERVER['REQUEST_URI'];
     }
 
     /**
@@ -118,10 +117,16 @@ class Router
      */
     public function check_dynamic_routes($registered_dynamic_route)
     {
-        $requested_route = preg_replace("/\/$/", '', $this->get_path()); // Remove slash from the end of the requested route
-        $dynamic_route = preg_replace("/\/$/", '', $registered_dynamic_route); // Remove slash from the end of the dynamic route
+        $requested_route = $this->get_path();
+        $dynamic_route = $registered_dynamic_route;
         $requested_route = explode('/', $requested_route);
         $dynamic_route = explode('/', $dynamic_route);
+        $requested_route = array_filter($requested_route, function($val){
+            return !!$val;
+        });
+        $dynamic_route = array_filter($dynamic_route, function($val){
+            return !!$val;
+        });
         if(count($dynamic_route) != count($requested_route)) return;
 
         $searches = array_diff($dynamic_route, $requested_route);
