@@ -59,7 +59,7 @@ class Router
         {
             App::set_response([
                 'status_code' => 404,
-                'message' => 'The requested method endpoint does not exist',
+                'message' => 'The requested endpoint does not exist',
                 'method' => strtoupper($this->get_method()),
                 'endpoint' => $this->get_path(),
             ]);
