@@ -78,8 +78,9 @@ class App
      */
     private function load_classes()
     {
-        require_once __DIR__ . "/Models/Model.php";
         require_once __DIR__ . "/Models/Connection.php";
+        require_once __DIR__ . "/Models/DB.php";
+        require_once __DIR__ . "/Models/Model.php";
         require_once __DIR__ . "/Controllers/Controller.php";
         $this->config = include(__DIR__ . "/../config/config.php");
     }

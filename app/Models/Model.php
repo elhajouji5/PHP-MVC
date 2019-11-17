@@ -3,26 +3,20 @@
 class Model
 {
 
+    protected $table;
+    
     public function __construct()
     {
         //
     }
 
-    public static function get()
-    {
-        $table = strtolower(get_called_class()) . 's';
-        $model = new static;
-        $connection = Connection::get_instance()->connect_to_db();;
-        if(!$connection) return;
-        $statement = $connection->prepare("SELECT * from products");
-        $statement->execute();
-        $statement->setFetchMode(PDO::FETCH_ASSOC);
-        $data = $statement->fetchAll();
-        return $data;
-    }    
-
     /**
-     * Set the related models
+     * @return string
+     * Get the table name
      */
+    public function get_schema_name()
+    {
+        return $this->table ?? strtolower(get_called_class()) . 's';
+    }
 
 }
