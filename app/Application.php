@@ -40,7 +40,9 @@ class App
     public function response()
     {
         $this->set_status_code();
-        echo json_encode($this->response);
+        if($this->response)
+            echo json_encode($this->response);
+
         $this->distruct();
         exit(0);
     }
@@ -79,6 +81,7 @@ class App
     private function load_classes()
     {
         require_once __DIR__ . "/Models/Connection.php";
+        require_once __DIR__ . "/Helpers/View.php";
         require_once __DIR__ . "/Models/DB.php";
         require_once __DIR__ . "/Models/Model.php";
         require_once __DIR__ . "/Controllers/Controller.php";

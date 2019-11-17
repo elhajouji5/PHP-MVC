@@ -10,6 +10,7 @@
  */
 
 ## Cart routes
+Router::get('/', 'HomeController@index'); // Get products
 Router::get('products', 'ProductController@index'); // Get products
 Router::get('products/{uid}', 'ProductController@show'); // Get products
 Router::get('cart', 'CartController@get_cart'); // Get cart content
