@@ -23,7 +23,7 @@
                 // Set the cart quantity and check the cart variant
                 let cart_rows = (cart.content || []).map(function( cart_item) {
                     return `<div class='row flex'>
-                            <a href='/products/${cart_item.product_uid}'>
+                            <a href='/products/${cart_item.slug}'>
                                 <img class='thumb' src='${cart_item.image}'>
                             </a>
                             <p>${cart_item.product_uid}</p>
