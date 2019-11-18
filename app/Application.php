@@ -84,6 +84,7 @@ class App
         require_once __DIR__ . "/Helpers/View.php";
         require_once __DIR__ . "/Models/DB.php";
         require_once __DIR__ . "/Models/Model.php";
+        require_once __DIR__ . "/Models/Product.php";
         require_once __DIR__ . "/Controllers/Controller.php";
         $this->config = include(__DIR__ . "/../config/config.php");
     }

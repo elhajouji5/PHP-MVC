@@ -10,7 +10,23 @@ class Product extends Model
      * @return array
      * Fetch products from database
      */
-    public static function get()
+    public static function get($uid)
+    {
+        $connection = Connection::get_instance()->connect_to_db();;
+        if(!$connection) return;
+        $self = (new static);
+        $schema_name = $self->get_schema_name();
+        // JOIN images AS img ON products.uid = img.imageable_id
+        $data = DB::select("SELECT products.*, (select image_link from images where images.imageable_id = products.uid limit 1) AS 'image' FROM {$schema_name} ", ['uid', $uid]);
+        $product = $self->remove_guarded_data($data);
+        return count($product) ? $product[0] : $product;
+    }
+
+    /**
+     * @return array
+     * Fetch products from database
+     */
+    public static function all()
     {
         $connection = Connection::get_instance()->connect_to_db();;
         if(!$connection) return;
