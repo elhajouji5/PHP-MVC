@@ -61,7 +61,11 @@
         setTimeout(function() {
             change_img()
         }, 3000)
+
         get_product()
+        setTimeout(function(){
+            get_cart()
+        }, 1000)
         document.querySelector('.add').addEventListener('click', function(){
             const qty = parseInt(document.querySelector('#qty').value)
             if(!qty) {
@@ -123,12 +127,24 @@
         }
 
         // Fetch cart
-        fetch('/api/cart/' + get_cookie('identifier'))
-        .then(response => response.json())
-        .then((cart_data) => {debugger
-            // Set the cart quantity and check the cart variant
-            cart_data
-        })
+        function get_cart() {
+            fetch('/api/cart/' + get_cookie('identifier'))
+            .then(response => response.json())
+            .then((cart) => {
+                // Set the cart quantity and check the cart variant
+                (cart.content || []).map(function( cart_item) {
+                    if(cart_item.product_uid === product_data.uid) {
+                        try {
+                            document.querySelector(`#${cart_item.variant_uid}`).checked = true
+                            document.querySelector(`#qty`).value = cart_item.qty
+                        } catch (e) {
+                            // 
+                        }
+
+                    }
+                })
+            })
+        }
 
     </script>
 
