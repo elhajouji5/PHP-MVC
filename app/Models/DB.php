@@ -24,4 +24,15 @@ class DB
         return $statement->fetchAll();
     }
 
+    /**
+     * @return mixed
+     * @param string $selectQuery
+     */
+    public static function statement(string $selectQuery)
+    {
+        $con = Connection::get_instance()->connect_to_db();
+        $statement = $con->prepare($selectQuery);
+        $statement->execute();
+    }
+
 }
