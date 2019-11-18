@@ -76,7 +76,7 @@ class CartController extends Controller
             return;
         }
         $inputs['identifier'] = array_key_exists('identifier', $inputs) && strlen(trim($inputs['identifier'])) ? $inputs['identifier'] : uniqid();
-        $inputs['name'] = $product['display_name'];
+        $inputs['name'] = $product['display_name'] . '(' . array_values($variant)[0]['display_name'] . ')';
         try {
             // Get product image if exists
             $inputs['image'] = $product['images'][0]['image_link'];
