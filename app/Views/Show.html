@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        
+        <div class="container flex">
+            <div class='content'></div>
+            <div class="add-to-cart">
+                    <h1 id='gr-title'></h1>
+                    <div class='desc'></div>
+                    <div class='variants'></div>
+                    <input type='number' id='qty' value='1'>
+                    <br>
+                    <button class="add">Add to cart</button>
+                </div>
+            </div>
+        </h1>
+    </body>
+
+    <script>
+        let product_data = {}
+        function get_product() {
+            let path = window.location.pathname.split('/')
+            let slug = path[path.length - 1]
+            fetch('/api/products/' + slug)
+                .then(response => response.json())
+                .then((product) => {
+                    product_data = product
+                    load_products(product)
+                })
+        }
+        function load_products(product) {
+            document.getElementById('gr-title').innerHTML = product.display_name
+            let images = (product.images || []).map(function(img){
+                return `<img src='${img.image_link}' class='thumb block' >`
+            })
+            let variants = (product.variants || []).map(function(variant){
+                return `<label for='${variant.uid}'>${variant.display_name} $${variant.price}</label> <input id='${variant.uid}' type='radio' name='variant'>`
+            })
+            let images_html = `
+                <div class='flex'>
+                        <div class=''>
+                        ` + images.join(' ') + `
+                    </div>
+                    <img class='pr-img'src='` + product.images[0].image_link + `'>
+                </div>
+            `;
+
+            document.querySelector('.desc').innerHTML += product.description;
+            document.querySelector('.content').innerHTML += images_html;
+            document.querySelector('.variants').innerHTML += variants.join(' ');
+        }
+
+        function change_img() {
+            [].forEach.call(document.querySelectorAll('.thumb'), function(img) {
+                img.addEventListener('click', function(e){
+                    document.querySelector('.pr-img').src = e.target.src
+                })
+            })
+        }
+
+        setTimeout(function() {
+            change_img()
+        }, 3000)
+        get_product()
+
+        document.querySelector('.add').addEventListener('click', function(){
+            const qty = parseInt(document.querySelector('#qty').value)
+            if(!qty) {
+                alert('Please type the quantity that you want')
+                return
+            }
+            variant_uid = null;
+            [].forEach.call(document.getElementsByName('variant'), function(item){
+                if(item.checked) {
+                    variant_uid = item.id
+                }
+            })
+            if(!variant_uid) {
+                alert('Please select a color')
+                return
+            }
+            const params = {
+                qty: qty,
+                product_uid: product_data.uid,
+                variant_uid: variant_uid,
+            }
+            fetch('/api/cart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'identifier': Math.random() * 10000
+                },
+                body: JSON.stringify(params)
+            })
+            .then((response)=> {
+                if(response.status < 400)
+                    alert('The car has been added to your cart successfully')
+                else
+                    alert('Something went wrong, please try again')
+            })
+        })
+    </script>
+
+    <style>
+        .container {
+            margin: 40px 10px;
+        }
+        h1 {
+            color: #546e7a;
+        }
+        .thumb {
+            width: 50px;
+            height: auto;
+            margin: 5px;
+            border: 1px solid transparent;
+            cursor: pointer;
+        }
+        .thumb.active {
+            border: 1px solid #27D;
+        }
+        .pr-img {
+            max-height: 400px;
+        }
+        .block {
+            display: block;
+        }
+        .flex {
+            display: flex;
+        }
+        .desc {
+            color: gray;
+            font-size: 18px;
+            width: 80%;
+            margin-bottom: 20px;
+        }
+        .add-to-cart {
+            margin: 0px 20px;
+        }
+        .add-to-cart button {
+            padding: 5px;
+            height: 35px;
+            width: 80px;
+            color: #1565C0;
+            background: #BBDEFB;
+        }
+        .add-to-cart input {
+            padding: 5px;
+            height: 20px;
+            width: 50px;
+            color: #1565C0;
+            background: #fff;
+        }
+    </style>
+</html>

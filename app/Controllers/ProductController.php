@@ -24,4 +24,9 @@ class ProductController extends Controller
         $products = Product::with_variants(['slug', $uid]);
         return count($products) ? $products[0] : [];
     }
+
+    public function show_page($params)
+    {
+        return View::get('Show');
+    }
 }
