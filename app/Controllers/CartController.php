@@ -18,9 +18,15 @@ class CartController extends Controller
         $id = $params[0];
         return Cart::get($id);
     }
-   
 
+    public function get_cart_page()
+    {
+        return View::get('Cart');
+    }
 
+    /**
+     * Validate and process the request
+     */
     public function update_cart()
     {
         $inputs = $_POST;
@@ -32,18 +38,70 @@ class CartController extends Controller
             $app->set_response([
                 'status_code' => '422',
                 'message' => 'Invalid parameters.',
-            ]);
+                ]);
+            return;
+        }
+        $product = Product::with_variants(['uid', $inputs['product_uid']]);
+        // Make sure the product_uid exists in the database and get the data to store it with cart
+        if(!$product = count($product) ? $product[0] : null)
+        {
+            $app->set_response([
+                'status_code' => '404',
+                'message' => 'The given product deos not exist.',
+                ]);
+            return;
+        }
+        // Make sure the variant_uid exists in the database and get the price to store it with cart data
+        $variant = [];
+        try {
+            $variant = array_filter($product['variants'], function($variant) use($inputs) {
+                return $inputs['variant_uid'] == $variant['uid'];
+            });
+        } catch (Exception $e) { /* Skip the exception since it will be handled right bellow */}
+        if(!count($variant))
+        {
+            $app->set_response([
+                'status_code' => '404',
+                'message' => 'The given variant deos not exist.',
+                ]);
+            return;
+        }
+        // Validate the qty availability
+        if((int) $inputs['qty'] > (int)array_values($variant)[0]['qty'])
+        {
+            $app->set_response([
+                'status_code' => '422',
+                'message' => 'The requested quantity is unavailable.',
+                ]);
             return;
         }
         $inputs['identifier'] = array_key_exists('identifier', $inputs) && strlen(trim($inputs['identifier'])) ? $inputs['identifier'] : uniqid();
-        // Make sure the variants_uid & product_uid exists in the database and get the product_name to persist it with cart data
+        $inputs['name'] = $product['display_name'];
+        try {
+            // Get product image if exists
+            $inputs['image'] = $product['images'][0]['image_link'];
+        } catch (Exception $e) {}
+        $inputs['price'] = array_values($variant)[0]['price'];
+        $inputs['slug'] = $product['slug'];
         return Cart::update($inputs);
     }
 
-
-    public function delete_item()
+    /**
+     * Validate and process the request
+     */
+    public function delete_item($params)
     {
-        return 'CartController@delete_item';
+        $inputs = $_POST;
+        // Make sure the posted data is valid
+        if(!is_array($inputs) || !$this->validate($inputs, ['product_uid', 'identifier']))
+        {
+            $app->set_response([
+                'status_code' => '422',
+                'message' => 'Invalid parameters.',
+            ]);
+            return false;
+        }
+        return Cart::remove_item($inputs['identifier'], $inputs['product_uid']);
     }
 
     /**

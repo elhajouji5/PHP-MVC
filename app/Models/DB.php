@@ -27,11 +27,16 @@ class DB
     /**
      * @return mixed
      * @param string $selectQuery
+     * @param array|null $filter
      */
-    public static function statement(string $selectQuery)
+    public static function statement(string $selectQuery, $filter = null)
     {
         $con = Connection::get_instance()->connect_to_db();
         $statement = $con->prepare($selectQuery);
+        if($filter)
+        {
+            $statement->bindParam(":search", $filter[1]);
+        }
         $statement->execute();
     }
 

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <nav>
+            <ul>
+                <li >
+                    <a href="/" > Return to produts page </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="container">
+            <div class='content block'></div>
+        </h1>
+    </body>
+    <script src="/script.js"></script>
+    <script>
+        // Fetch cart
+        function get_cart() {
+            fetch('/api/cart/' + get_cookie('identifier'))
+            .then(response => response.json())
+            .then((cart) => {
+                // Set the cart quantity and check the cart variant
+                let cart_rows = (cart.content || []).map(function( cart_item) {
+                    return `<div class='row flex'>
+                            <a href='/products/${cart_item.product_uid}'>
+                                <img class='thumb' src='${cart_item.image}'>
+                            </a>
+                            <p>${cart_item.product_uid}</p>
+                            <p>${cart_item.price} x ${cart_item.qty}</p>
+                            <p>$ `+ parseInt(cart_item.qty) * parseFloat(cart_item.price) +`</p>
+                            <a href='/products/${cart_item.slug}'>Edit</a>
+                            <button onclick='remove("${cart_item.product_uid}")'>Delete</button>
+                        </div>`
+                })
+                document.querySelector(`.content`).innerHTML = cart_rows.join(' ')
+            })
+        }
+        get_cart()
+
+        function remove(product_uid) {
+            fetch('/api/cart/' + product_uid + '/delete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Accept': 'application/x-www-form-urlencoded',
+                },
+                body: `product_uid=${product_uid}&identifier=${get_cookie('identifier')}`
+            })
+            .then(response => response.json())
+            .then((response) => {
+                if(response) {
+                    if(response.hasOwnProperty('message')) {
+                        alert(response.message)
+                    } else {
+                        alert('Operation done successfully')
+                    }
+                    window.location.reload()
+                }
+                else
+                    alert('Something went wrong, please try again')
+            })
+        }
+    </script>
+
+    <style>
+        .container {
+            margin: 40px 10px;
+        }
+        .thumb {
+            width: 50px;
+            height: auto;
+            margin: 5px;
+            border: 1px solid transparent;
+            cursor: pointer;
+        }
+        .block {
+            display: block;
+        }
+        .flex {
+            display: flex;
+        }
+        .row *{
+            padding: 5px;
+        }
+    </style>
+</html>
