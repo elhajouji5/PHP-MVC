@@ -1,3 +1,10 @@
+// Set the cookie
+function set_cookie(name, val) {
+    var date = new Date();
+    date.setTime(date.getTime() + (30 * 24 * 60 * 60 * 1000)); // the cookie will expires after 1 month
+    var expires = "expires="+ date.toUTCString();
+    document.cookie = name + "=" + val + ";" + expires + ";path=/";
+}
 // Get the cookie
 function get_cookie(name) {
     name = name + "=";
