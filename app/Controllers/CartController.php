@@ -13,9 +13,12 @@ class CartController extends Controller
         parent::__construct();
     }
 
-    public function get_cart($params)
+    public function get_cart($id = null)
     {
-        $id = $params[0];
+        if(!$id)
+        {
+            return $this->response('The cart identifier is required.', 422);
+        }
         return Cart::get($id);
     }
 
@@ -35,21 +38,13 @@ class CartController extends Controller
         // and should provide the qty, product_uid and variant_uid
         if(!is_array($inputs) || !$this->validate($inputs, ['qty', 'product_uid', 'variant_uid']))
         {
-            $app->set_response([
-                'status_code' => '422',
-                'message' => 'Invalid parameters.',
-                ]);
-            return;
+            return $this->response('Invalid parameters.', 422);
         }
         $product = Product::with_variants(['uid', $inputs['product_uid']]);
         // Make sure the product_uid exists in the database and get the data to store it with cart
         if(!$product = count($product) ? $product[0] : null)
         {
-            $app->set_response([
-                'status_code' => '404',
-                'message' => 'The given product deos not exist.',
-                ]);
-            return;
+            return $this->response('The given product deos not exist.', 404);
         }
         // Make sure the variant_uid exists in the database and get the price to store it with cart data
         $variant = [];
@@ -60,20 +55,12 @@ class CartController extends Controller
         } catch (Exception $e) { /* Skip the exception since it will be handled right bellow */}
         if(!count($variant))
         {
-            $app->set_response([
-                'status_code' => '404',
-                'message' => 'The given variant deos not exist.',
-                ]);
-            return;
+            return $this->response('The given variant deos not exist.', 404);
         }
         // Validate the qty availability
         if((int) $inputs['qty'] > (int)array_values($variant)[0]['qty'])
         {
-            $app->set_response([
-                'status_code' => '422',
-                'message' => 'The requested quantity is unavailable.',
-                ]);
-            return;
+            return $this->response('The requested quantity is unavailable.', 422);
         }
         $inputs['identifier'] = array_key_exists('identifier', $inputs) && strlen(trim($inputs['identifier'])) ? $inputs['identifier'] : uniqid();
         $inputs['name'] = $product['display_name'] . '(' . array_values($variant)[0]['display_name'] . ')';

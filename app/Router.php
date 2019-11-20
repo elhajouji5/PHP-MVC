@@ -35,7 +35,7 @@ class Router
         $method = explode('@', array_values($requested_resource)[0])[1];
         require_once __DIR__ . "/Controllers/{$controller_name}.php"; // Load the corresponding controller
         $controller = new $controller_name; // Instantaite the corresponding controller
-        $response = $controller->{$method}(array_values($this->params ?? [])); // Call the corresponding method
+        $response = $controller->{$method}(...array_values($this->params ?? [])); // Call the corresponding method
         /**
          * Make sure that the request was valid and executed successfully
          * before setting the response data

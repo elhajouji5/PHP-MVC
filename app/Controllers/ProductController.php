@@ -17,10 +17,17 @@ class ProductController extends Controller
         return $products;
     }
 
-    public function show($params)
+    public function show($slug)
     {
-        $uid = $params[0];
-        $products = Product::with_variants(['slug', $uid]);
+        if(!$slug)
+        {
+            return $this->response('The slug is required.', 422);
+        }
+        $products = Product::with_variants(['slug', $slug]);
+        if(!$products)
+        {
+            return $this->response('The product your looking for does not exist.', 404);
+        }
         return count($products) ? $products[0] : [];
     }
 
