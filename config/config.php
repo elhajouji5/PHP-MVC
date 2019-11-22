@@ -6,11 +6,11 @@
  */
 
 return [
-    'APP_NAME' => 'WWTest',
+    'APP_NAME' => 'PHP-MVC',
     'APP_ENV' => 'dev',
     'DB_HOST' => 'db',
-    'DB_DATABASE' => 'elhajouji_db',
+    'DB_DATABASE' => 'db_name',
     'DB_USERNAME' => 'root',
-    'DB_PASSWORD' => 'elhajouji_password',
+    'DB_PASSWORD' => 'db_root_password',
 ];
 
