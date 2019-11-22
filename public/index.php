@@ -7,7 +7,7 @@
 
 require_once __DIR__ . '/../app/Application.php';
 /**
- * Create a new instance of our app
+ * Create a new instance of the app
  */
 $app = App::get_instance();
 
